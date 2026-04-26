@@ -25,8 +25,11 @@ COPY . .
 # Create directory for persistent data
 RUN mkdir -p data/uploads data/faiss
 
+# Make start script executable
+RUN chmod +x start.sh
+
 # Expose port
 EXPOSE 8000
 
-# Default command (will be overridden by Render service commands)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command runs both Celery and FastAPI
+CMD ["./start.sh"]
