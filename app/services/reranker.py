@@ -7,8 +7,6 @@ by relevance to the query.
 import logging
 from typing import Dict, List, Optional
 
-from sentence_transformers import CrossEncoder
-
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -29,6 +27,11 @@ class RerankerService:
         if self._initialized:
             return
         logger.info("Loading reranker model: %s", settings.reranker_model)
+        try:
+            from sentence_transformers import CrossEncoder
+        except ImportError:
+            logger.error("sentence_transformers is not installed.")
+            raise
         self.model = CrossEncoder(settings.reranker_model)
         self._initialized = True
 
