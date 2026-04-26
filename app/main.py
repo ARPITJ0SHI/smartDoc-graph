@@ -97,22 +97,6 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
     )
 
 
-# API key auth middleware
-@app.middleware("http")
-async def api_key_auth(request: Request, call_next):
-    """Check X-API-Key header for all routes except health check."""
-    # Skip auth for health check and docs
-    skip_paths = {"/health", "/docs", "/openapi.json", "/redoc"}
-    if request.url.path in skip_paths:
-        return await call_next(request)
-
-    api_key = request.headers.get("X-API-Key")
-    if api_key != settings.api_key:
-        return JSONResponse(
-            status_code=401,
-            content={"detail": "Invalid or missing API key."},
-        )
-    return await call_next(request)
 
 
 # ---- Routes ----

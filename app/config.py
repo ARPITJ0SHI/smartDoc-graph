@@ -52,7 +52,6 @@ class Settings(BaseSettings):
     memory_summary_interval: int = 6
 
     # --- Security ---
-    api_key: str = "your-api-key-here"
     rate_limit: str = "30/minute"
 
 

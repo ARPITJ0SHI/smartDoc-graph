@@ -70,7 +70,6 @@ We have included sample documents in the `/sample_docs` folder.
 Upload a document to the async processing queue:
 ```bash
 curl -X POST "http://localhost:8000/api/v1/documents/upload" \
-  -H "X-API-Key: your-api-key-here" \
   -F "file=@./sample_docs/sample_medical_doc.pdf"
 ```
 **Response:**
@@ -84,15 +83,13 @@ curl -X POST "http://localhost:8000/api/v1/documents/upload" \
 
 ### 2. Check Task Status
 ```bash
-curl -X GET "http://localhost:8000/api/v1/tasks/<task-uuid>" \
-  -H "X-API-Key: your-api-key-here"
+curl -X GET "http://localhost:8000/api/v1/tasks/<task-uuid>"
 ```
 
 ### 3. Ask a Question
 Once the task is `COMPLETED`, ask a question. To test conversational memory, use the same `session_id` in subsequent requests!
 ```bash
 curl -X POST "http://localhost:8000/api/v1/chat" \
-  -H "X-API-Key: your-api-key-here" \
   -H "Content-Type: application/json" \
   -d '{
     "session_id": "session-uuid-1234",
