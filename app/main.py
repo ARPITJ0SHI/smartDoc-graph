@@ -13,6 +13,7 @@ Middleware:
 """
 
 import logging
+import threading
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException
@@ -36,30 +37,17 @@ limiter = Limiter(key_func=get_remote_address, default_limits=[settings.rate_lim
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
-    # --- Startup ---
     logger.info("Initializing database tables...")
     init_db()
 
-    logger.info("Preloading FAISS index...")
-    from app.services.vector_store import VectorStoreService
-    VectorStoreService()
+    logger.info("Starting in-process Celery worker to save memory...")
+    def run_celery():
+        from app.workers.celery_app import celery_app
+        # Run the celery worker inside this thread
+        celery_app.worker_main(["worker", "--loglevel=info", "--pool=solo"])
 
-    logger.info("Preloading embedding model...")
-    from app.services.embedding import EmbeddingService
-    EmbeddingService()
-
-    logger.info("Preloading LLM client...")
-    from app.services.llm import get_llm_service
-    get_llm_service()
-
-    if settings.enable_reranker:
-        logger.info("Preloading reranker model...")
-        from app.services.reranker import RerankerService
-        RerankerService()
-
-    logger.info("Warming cache connection...")
-    from app.services.cache import CacheService
-    CacheService()
+    celery_thread = threading.Thread(target=run_celery, daemon=True)
+    celery_thread.start()
 
     logger.info("SmartDoc API ready.")
     yield
